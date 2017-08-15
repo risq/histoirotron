@@ -8,7 +8,7 @@
     "dev": "cross-env NODE_ENV=development webpack-dev-server --open --inline --hot --content-base dist/",
     "build-dev": "npm-run-all private-lint-root private-build-dev",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
-    "serve": "node server.js",
+    "serve": "cross-env NODE_ENV=production node index.js",
     "start": "npm-run-all build serve"
   },
   "repository": {
@@ -54,6 +54,7 @@
     "node": "7.5.0"
   },
   "devDependencies": {
+    "babel-preset-env": "^1.6.0",
     "raw-loader": "^0.5.1"
   }
 }
