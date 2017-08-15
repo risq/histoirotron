@@ -7,9 +7,10 @@
     "private-build-dev": "cross-env NODE_ENV=development webpack --progress --hide-modules",
     "private-lint-root": "eslint *.js",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --open --inline --hot --content-base dist/",
+    "server-dev": "cross-env NODE_ENV=development DEBUG=\"histoirotron:*\" node index.js",
     "build-dev": "npm-run-all private-lint-root private-build-dev",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
-    "serve": "cross-env NODE_ENV=production node index.js",
+    "serve": "cross-env NODE_ENV=production DEBUG=\"histoirotron:*\" node index.js",
     "start": "npm-run-all build serve"
   },
   "repository": {
@@ -33,6 +34,7 @@
     "copy-webpack-plugin": "4.0.1",
     "cross-env": "3.1.4",
     "css-loader": "0.26.1",
+    "debug": "^3.0.0",
     "eslint": "3.15.0",
     "eslint-loader": "1.6.1",
     "express": "4.14.1",
@@ -45,6 +47,7 @@
     "pixi-filters": "^2.0.0",
     "pixi.js": "4.3.5",
     "raf": "3.3.0",
+    "serialport": "^5.0.0",
     "slash": "1.0.0",
     "style-loader": "0.13.1",
     "texture-atlas": "0.2.1",

@@ -5,7 +5,8 @@
 #define RST_PIN 9 
 #define SS_PIN 10
 #define LED_PIN 8
-#define LIMIT_SWITCH_PIN 2
+#define LIMIT_SWITCH_LEFT_PIN 2
+#define LIMIT_SWITCH_RIGHT_PIN 3
 
 #define MOTOR_STEPS 200
 #define STEPPER_SPEED 75
@@ -13,9 +14,11 @@
 Stepper stepper(MOTOR_STEPS, 4, 5, 6, 7);
 MFRC522 rfid(SS_PIN, RST_PIN);
 
-int dir = 0;
+int dir = 1;
 int check = 0;
-int limitSwitchState = 0;
+int limitSwitchLeftState = 0;
+int limitSwitchRightState = 0;
+bool moving = false;
 
 void setup() {
   Serial.begin(9600);   // Initialize serial communications with the PC
@@ -25,11 +28,12 @@ void setup() {
   SPI.begin();      // Init SPI bus
   rfid.PCD_Init();   // Init MFRC522
   rfid.PCD_DumpVersionToSerial();  // Show details of PCD - MFRC522 Card Reader details
-  
-  Serial.println(F("Scan PICC to see UID, SAK, type, and data blocks..."));
-  
+    
   pinMode(LED_PIN, OUTPUT);
-  pinMode(LIMIT_SWITCH_PIN, INPUT);
+  pinMode(LIMIT_SWITCH_LEFT_PIN, INPUT);
+  pinMode(LIMIT_SWITCH_RIGHT_PIN, INPUT);
+
+  startMoving();
 }
 
 void loop() {
@@ -42,21 +46,14 @@ void loop() {
       unsigned long uid = getID();
       
       if (uid != -1){
-        Serial.print("Card detected, UID: "); 
+        Serial.print("UID: "); 
         Serial.println(uid);
-  
-        if (uid == 4294961722) {
-          Serial.println("Moving forward.");
-          dir = 1;
-        } else if (uid == 4294961210) {
-          Serial.println("Moving backward.");
-          dir = -1;
-        } else {
-          Serial.println("Stopping.");
-          dir = 0;
-        }
-  
         Serial.println();
+
+        if (uid == 4294961722) {
+          Serial.println("Special card found: starting to move.");
+          startMoving();
+        }
       }
   
       digitalWrite(LED_PIN, LOW);
@@ -65,15 +62,49 @@ void loop() {
     check++;
   }
 
-  limitSwitchState = digitalRead(LIMIT_SWITCH_PIN);
+  limitSwitchLeftState = digitalRead(LIMIT_SWITCH_LEFT_PIN);
+  limitSwitchRightState = digitalRead(LIMIT_SWITCH_RIGHT_PIN);
   
-  if (limitSwitchState == HIGH) {
-    dir = 0;
-    Serial.println("Finished..");
+  if (limitSwitchLeftState == HIGH) {
     digitalWrite(LED_PIN, HIGH);
+    
+    stepper.step(MOTOR_STEPS / 100);
+    
+    stopMoving();
+  } else if (limitSwitchRightState == HIGH) {
+    digitalWrite(LED_PIN, HIGH);
+    
+    stepper.step(-MOTOR_STEPS / 100);
+    
+    stopMoving();
+  } else if (moving) {
+     stepper.step(MOTOR_STEPS / 100 * dir);
+  }
+}
+
+void startMoving() {
+  if (moving) {
+    return;
+  }
+
+  Serial.println("Starting to move...");
+  moving = true;
+  
+}
+
+void stopMoving() {
+  if (!moving) {
+    return;
   }
   
-  stepper.step(MOTOR_STEPS / 100 * dir);
+  Serial.println("Stopping.");
+  moving = false;
+  
+  if (dir == -1) {
+    dir = 1;
+  } else if (dir == 1) {
+    dir = -1;
+  }
 }
 
 /**
@@ -131,16 +162,6 @@ void move() {
     stepper.setSpeed(motorSpeed);
     // step 1/100 of a revolution:
     stepper.step(MOTOR_STEPS / 100 * dir);
-  }
-}
-
-/**
- * Helper routine to dump a byte array as dec values to Serial.
- */
-void printDec(byte *buffer, byte bufferSize) {
-  for (byte i = 0; i < bufferSize; i++) {
-    Serial.print(buffer[i] < 0x10 ? " 0" : " ");
-    Serial.print(buffer[i], DEC);
   }
 }
 

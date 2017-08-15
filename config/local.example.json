@@ -1,3 +1,10 @@
 {
-  "port": 8000
+  "arduino": {
+    "port": "/dev/tty-usbserial1",
+    "baudRate": 9600
+  },
+  "printer": {
+    "port": "/dev/tty-usbserial2",
+    "baudRate": 9600
+  }
 }
