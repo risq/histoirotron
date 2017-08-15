@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "",
   "scripts": {
+    "install": "cp -n config/local.example.json config/local.json || true",
     "private-build-dev": "cross-env NODE_ENV=development webpack --progress --hide-modules",
     "private-lint-root": "eslint *.js",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --open --inline --hot --content-base dist/",
@@ -28,6 +29,7 @@
     "babel-polyfill": "6.23.0",
     "babel-preset-latest": "6.22.0",
     "clean-webpack-plugin": "0.1.15",
+    "config": "^1.26.2",
     "copy-webpack-plugin": "4.0.1",
     "cross-env": "3.1.4",
     "css-loader": "0.26.1",
