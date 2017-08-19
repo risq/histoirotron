@@ -1,29 +1,31 @@
 const SerialPort = require('serialport');
 const config = require('config');
+
 const debug = require('debug')('histoirotron:arduino');
+
+let port;
 
 function init() {
   debug('Initializing module...');
 
-  SerialPort.list((err, ports) => {
-    if (err) {
-      debug('Error finding ports', err)
-    } else {
-      debug(`${ports.length} ports found: ${ports.map(port => port.comName).join(' ')}`)
-    }
-  });
+  return new Promise((resolve, reject) => {
+    port = new SerialPort(config.get('arduino.port'), {
+        baudRate: config.get('arduino.baudRate'),
+        parser: SerialPort.parsers.readline('\n'),
+      }, (err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        debug(`Arduino ready on port ${config.get('arduino.port')}`);
+        resolve();
+      });
 
-  const arduinoSerialPort = new SerialPort(config.get('arduino.port'), {
-    baudRate: config.get('arduino.baudRate'),
-  });
+    port.on('data', onData);
 
-  const parser = new SerialPort.parsers.Readline();
-  arduinoSerialPort.pipe(parser);
-
-  parser.on('data', onData);
-
-  arduinoSerialPort.on('error', function(err) {
-    debug('Error: ', err.message);
+    port.on('error', function(err) {
+      debug('Error: ', err.message);
+    });
   });
 }
 
@@ -34,7 +36,7 @@ function onData(data) {
     return;
   }
 
-  debug(`>> ${string}`);
+  debug(`serial >> ${string}`);
 
   const uidMatch = /UID:\s(.*)/.exec(string);
   if (uidMatch) {
