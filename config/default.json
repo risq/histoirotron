@@ -8,6 +8,7 @@
   },
   "printer": {
     "port": "/dev/tty-usbserial2",
-    "baudRate": 9600
+    "baudRate": 9600,
+    "maxChars": 32
   }
 }

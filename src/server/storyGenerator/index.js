@@ -7,8 +7,6 @@ const contextTags = {
   cute: 5,
 }
 
-generateStory();
-
 function generateStory() {
   const context = { contextTags, persistantValues : {} };
   const bucket = dictionary.map(parsePart);
@@ -18,6 +16,7 @@ function generateStory() {
   debug(story);
   debug('----------- End ------------');
   debug('Final context', context);
+  return story;
 }
 
 
@@ -116,4 +115,6 @@ function getAllMatches(regexp, str) {
 }
 
 
-module.exports = fillPart;
+module.exports = {
+  generateStory,
+};
