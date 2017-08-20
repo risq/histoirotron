@@ -4,7 +4,7 @@
 
 #define RST_PIN 9 
 #define SS_PIN 10
-#define LED_PIN 8
+#define START_BUTTON_PIN 8
 #define LIMIT_SWITCH_LEFT_PIN 2
 #define LIMIT_SWITCH_RIGHT_PIN 3
 
@@ -17,6 +17,7 @@ MFRC522 rfid(SS_PIN, RST_PIN);
 int dir = 1;
 int check = 0;
 int limitSwitchLeftState = 0;
+int startButtonState = 0;
 int limitSwitchRightState = 0;
 bool moving = false;
 
@@ -29,7 +30,7 @@ void setup() {
   rfid.PCD_Init();   // Init MFRC522
   rfid.PCD_DumpVersionToSerial();  // Show details of PCD - MFRC522 Card Reader details
     
-  pinMode(LED_PIN, OUTPUT);
+  pinMode(START_BUTTON_PIN, INPUT);
   pinMode(LIMIT_SWITCH_LEFT_PIN, INPUT);
   pinMode(LIMIT_SWITCH_RIGHT_PIN, INPUT);
 
@@ -41,8 +42,6 @@ void loop() {
     check = 0;
     
     if (rfid.PICC_IsNewCardPresent()) {
-      digitalWrite(LED_PIN, HIGH);
-    
       unsigned long uid = getID();
       
       if (uid != -1){
@@ -55,25 +54,25 @@ void loop() {
           startMoving();
         }
       }
-  
-      digitalWrite(LED_PIN, LOW);
     }
   } else {
     check++;
   }
 
+  startButtonState = digitalRead(START_BUTTON_PIN);
+
+  if (startButtonState == HIGH) {
+    startMoving();
+  }
+  
   limitSwitchLeftState = digitalRead(LIMIT_SWITCH_LEFT_PIN);
   limitSwitchRightState = digitalRead(LIMIT_SWITCH_RIGHT_PIN);
   
   if (limitSwitchLeftState == HIGH) {
-    digitalWrite(LED_PIN, HIGH);
-    
     stepper.step(MOTOR_STEPS / 100);
     
     stopMoving();
   } else if (limitSwitchRightState == HIGH) {
-    digitalWrite(LED_PIN, HIGH);
-    
     stepper.step(-MOTOR_STEPS / 100);
     
     stopMoving();
@@ -122,27 +121,6 @@ unsigned long getID(){
   hex_num += rfid.uid.uidByte[3];
   rfid.PICC_HaltA(); // Stop reading
   return hex_num;
-}
-
-void loop2() {
-  if ( check == 100 ) {
-    check = 0;
-    
-    if ( rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial() ) {
-      digitalWrite(LED_PIN, HIGH);
-      //rfid.PICC_DumpToSerial(&(rfid.uid));
-      Serial.print(F("In dec: "));
-      rfid.PICC_DumpDetailsToSerial(&(rfid.uid));
-      Serial.println();
-      
-      return;
-    }
-  } else {
-    check++;
-  }
- 
-  digitalWrite(LED_PIN, LOW);
-  //move();
 }
 
 void move() {
