@@ -6,6 +6,7 @@ import { RGBSplitFilter } from 'pixi-filters';
 settings.SCALE_MODE = SCALE_MODES.NEAREST;
 
 import bluebird from "bluebird";
+import io from 'socket.io-client';
 
 import * as engine from 'engine';
 import * as display from 'engine/display';
@@ -23,6 +24,14 @@ import Terminal from './Terminal';
 
 class Histoirotron extends Scene {
   init() {
+
+    this.socket = io('http://localhost:8000');
+
+    this.socket.on('connect', () => console.log('Socket connected'));
+    this.socket.on('disconnect', () => console.log('Socket disconnected'));
+    this.socket.on('startScanAnimation', () => this.startScanAnimation());
+    this.socket.on('startEndAnimation', () => this.startEndAnimation());
+
     this.badTvFilter = new BadTvFilter();
     this.crtFilter = new CrtFilter();
     this.RGBSplitFilter = new RGBSplitFilter();
@@ -32,7 +41,7 @@ class Histoirotron extends Scene {
       this.RGBSplitFilter,
       this.crtFilter,
     ];
-    
+
     this.randomizeRGBSplit(0);
 
     this.background = new Graphics();
@@ -92,9 +101,10 @@ class Histoirotron extends Scene {
 
     this.messages.end.anchor.set(0.5, 0.5);
     this.messages.end.position.set(display.width / 2, display.height / 2);
+    this.messages.end.visible = false;
 
     this.stage.addChild(this.messages.begin);
-    //this.stage.addChild(this.messages.end);
+    this.stage.addChild(this.messages.end);
   }
 
   update(delta) {
@@ -114,6 +124,8 @@ class Histoirotron extends Scene {
     }
 
     this.isGlitching = true;
+    this.terminals.forEach(terminal => terminal.isGlitching = true);
+
     this.glitch();
   }
 
@@ -123,6 +135,8 @@ class Histoirotron extends Scene {
     }
 
     this.isGlitching = false;
+    this.terminals.forEach(terminal => terminal.isGlitching = false);
+
     this.randomizeRGBSplit(0);
   }
 
@@ -142,7 +156,7 @@ class Histoirotron extends Scene {
         this.badTvFilter.setStrength(1);
         this.randomizeRGBSplit(randBetween(1, 4));
       })
-      .delay(randBetween(100, 5000))
+      .delay(randBetween(10, 500))
       .then(() => this.glitch());
   }
 
@@ -153,6 +167,32 @@ class Histoirotron extends Scene {
     this.RGBSplitFilter.uniforms.green.y = randBetween(-size, size);
     this.RGBSplitFilter.uniforms.blue.x = randBetween(-size, size);
     this.RGBSplitFilter.uniforms.blue.y = randBetween(-size, size);
+  }
+
+  startScanAnimation() {
+    if (this.endAnimationTimeout) {
+      clearTimeout(this.endAnimationTimeout);
+    }
+
+    this.messages.begin.visible = false;
+    this.messages.end.visible = false;
+
+    this.startGlitch();
+  }
+
+  startEndAnimation() {
+    if (this.endAnimationTimeout) {
+      clearTimeout(this.endAnimationTimeout);
+    }
+
+    this.messages.begin.visible = false;
+    this.messages.end.visible = true;
+    this.stopGlitch();
+
+    this.endAnimationTimeout = setTimeout(() => {
+      this.messages.begin.visible = true;
+      this.messages.end.visible = false;
+    }, 10000);
   }
 }
 

@@ -45,7 +45,7 @@ void loop() {
       unsigned long uid = getID();
       
       if (uid != -1){
-        Serial.print("UID: "); 
+        Serial.print("[UID] "); 
         Serial.println(uid);
         Serial.println();
 
@@ -77,7 +77,7 @@ void loop() {
     
     stopMoving();
   } else if (moving) {
-     stepper.step(MOTOR_STEPS / 100 * dir);
+    stepper.step(MOTOR_STEPS / 100 * dir);
   }
 }
 
@@ -87,6 +87,7 @@ void startMoving() {
   }
 
   Serial.println("Starting to move...");
+  Serial.println("[START_SCAN]"); 
   moving = true;
   
 }
@@ -97,6 +98,7 @@ void stopMoving() {
   }
   
   Serial.println("Stopping.");
+  Serial.println("[STOP_SCAN]");
   moving = false;
   
   if (dir == -1) {

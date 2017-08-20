@@ -1,7 +1,10 @@
 const SerialPort = require('serialport');
 const config = require('config');
+const EventEmitter = require('events');
 
 const debug = require('debug')('histoirotron:arduino');
+
+const events = new EventEmitter();
 
 let port;
 
@@ -36,14 +39,30 @@ function onData(data) {
     return;
   }
 
-  debug(`serial >> ${string}`);
-
-  const uidMatch = /UID:\s(.*)/.exec(string);
-  if (uidMatch) {
-    debug(`Found UID: ${uidMatch[1]}`);
+  if (string === '[START_SCAN]') {
+    debug('Starting to scan');
+    events.emit('scan-start');
+    return;
   }
+
+  if (string === '[STOP_SCAN]') {
+    debug('Scan finished');
+    events.emit('scan-stop');
+    return;
+  }
+
+  const uidMatch = /\[UID\]\s(.*)/.exec(string);
+  if (uidMatch) {
+    const uid = uidMatch[1];
+    debug(`Found UID: ${uid}`);
+    events.emit('uid', uid);
+    return;
+  }
+
+  debug(`serial >> ${string}`);
 }
 
 module.exports = {
-  init
+  init,
+  events,
 };

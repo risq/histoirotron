@@ -7,6 +7,8 @@ const escpos = require('escpos');
 const device  = new escpos.Serial(config.get('printer.port'));
 const printer = new escpos.Printer(device);
 
+let ready;
+
 function init() {
   debug('Initializing module...');
 
@@ -17,6 +19,7 @@ function init() {
         return;
       }
       debug(`Printer ready on port ${config.get('printer.port')}`);
+      ready = true;
       resolve();
     });
   })
@@ -44,7 +47,10 @@ function prepareText(text) {
 
 function print(text, center) {
   debug(`Printing text: "${text}"`);
-  debug(prepareText(text))
+
+  if (!ready) {
+    return Promise.reject(new Error('Printer is not ready'));
+  }
 
   return new Promise((resolve, reject) =>
     printer
@@ -58,6 +64,10 @@ function print(text, center) {
 
 function printLarge(text, center) {
   debug(`Printing text (large): "${text}"`);
+
+  if (!ready) {
+    return Promise.reject(new Error('Printer is not ready'));
+  }
 
   return new Promise((resolve, reject) =>
     printer

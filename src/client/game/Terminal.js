@@ -39,6 +39,7 @@ export default class Terminal extends Sprite {
     this.container.addChild(this.text);
 
     this.dirtyText = false;
+    this.isGlitching = false;
 
     this.writeRandomLines();
   }
@@ -56,7 +57,7 @@ export default class Terminal extends Sprite {
   }
 
   writeRandomLines() {
-    if (Math.random() > 0.1) {
+    if (this.isGlitching && Math.random() > 0.05) {
       return this.write(getFakeTextLines(), true)
         .delay(randBetween(0, 300))
         .then(() => this.writeRandomLines());
@@ -93,7 +94,7 @@ export default class Terminal extends Sprite {
     this.updateText();
   }
 
-  writeLines(lines, speed = randBetween(0, 200)) {
+  writeLines(lines, speed = this.isGlitching ? randBetween(0, 50) : randBetween(150, 300)) {
     if (!lines || !lines.length) {
       return;
     }
