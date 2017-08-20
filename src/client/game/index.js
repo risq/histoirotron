@@ -32,10 +32,14 @@ class Histoirotron extends Scene {
       this.RGBSplitFilter,
       this.crtFilter,
     ];
+    
+    this.randomizeRGBSplit(0);
 
     this.background = new Graphics();
-    this.background.beginFill(0x111111);
-    this.background.drawRect(0, 0, display.width, display.height);
+    this.background
+      .beginFill(0x111111)
+      .drawRect(0, 0, display.width, display.height);
+
     this.stage.addChild(this.background);
 
     this.terminals = [
@@ -61,20 +65,36 @@ class Histoirotron extends Scene {
     const margin = strokeSize / 2;
 
     this.lines = new Graphics();
-    this.lines.lineStyle(strokeSize, 0x61ffb0)
-       .moveTo(margin, margin)
-       .lineTo(display.width - margin, margin)
-       .lineTo(display.width - margin, display.height - margin)
-       .lineTo(margin, display.height - margin)
-       .lineTo(margin, margin)
-       .moveTo(display.width / 2, margin)
-       .lineTo(display.width / 2, display.height - margin)
-       .moveTo(display.width / 2, display.height / 2)
-       .lineTo(display.width - margin, display.height / 2)
+    this.lines
+      .lineStyle(strokeSize, 0x61ffb0)
+      .moveTo(margin, margin)
+      .lineTo(display.width - margin, margin)
+      .lineTo(display.width - margin, display.height - margin)
+      .lineTo(margin, display.height - margin)
+      .lineTo(margin, margin)
+      .moveTo(display.width / 2, margin)
+      .lineTo(display.width / 2, display.height - margin)
+      .moveTo(display.width / 2, display.height / 2)
+      .lineTo(display.width - margin, display.height / 2);
 
     this.stage.addChild(this.lines);
 
-    this.glitch();
+    const popupHeight = display.height / 5;
+    const popupWidth = display.width / 2;
+
+    this.messages = {
+      begin: Sprite.fromFrame('message1'),
+      end: Sprite.fromFrame('message2'),
+    }
+
+    this.messages.begin.anchor.set(0.5, 0.5);
+    this.messages.begin.position.set(display.width / 2, display.height / 2);
+
+    this.messages.end.anchor.set(0.5, 0.5);
+    this.messages.end.position.set(display.width / 2, display.height / 2);
+
+    this.stage.addChild(this.messages.begin);
+    //this.stage.addChild(this.messages.end);
   }
 
   update(delta) {
@@ -88,7 +108,29 @@ class Histoirotron extends Scene {
     }
   }
 
+  startGlitch() {
+    if (this.isGlitching) {
+      return;
+    }
+
+    this.isGlitching = true;
+    this.glitch();
+  }
+
+  stopGlitch() {
+    if (!this.isGlitching) {
+      return;
+    }
+
+    this.isGlitching = false;
+    this.randomizeRGBSplit(0);
+  }
+
   glitch() {
+    if (!this.isGlitching) {
+      return;
+    }
+
     const strength = Math.random();
     const invStrength = 1 - strength;
 

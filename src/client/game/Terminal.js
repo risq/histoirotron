@@ -29,7 +29,7 @@ export default class Terminal extends Sprite {
 
     this.textLines = [];
     const style = new TextStyle({
-        fontFamily: 'Monaco,"Lucia Console","Courier 10 Pitch","Nimbus Mono L","Courier New","Courier",monospace',
+        fontFamily: '"Lucia Console","Courier 10 Pitch","Nimbus Mono L","Courier New","Courier",monospace',
         fontSize: height * 0.02,
         fill: '#61ffb0',
     });

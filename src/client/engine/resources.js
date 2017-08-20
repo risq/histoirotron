@@ -37,7 +37,7 @@ export const destroy = function() {
   }
 };
 
-export const init = function({pack = true} = {}) {
+export const init = function({pack = false} = {}) {
   return Promise.all([loadAudio(), loadTextures(pack)]);
 };
 
