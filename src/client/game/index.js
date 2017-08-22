@@ -97,9 +97,11 @@ class Histoirotron extends Scene {
     }
 
     this.messages.begin.anchor.set(0.5, 0.5);
+    this.messages.begin.scale.set(0.5, 0.5);
     this.messages.begin.position.set(display.width / 2, display.height / 2);
 
     this.messages.end.anchor.set(0.5, 0.5);
+    this.messages.end.scale.set(0.5, 0.5);
     this.messages.end.position.set(display.width / 2, display.height / 2);
     this.messages.end.visible = false;
 

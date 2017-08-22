@@ -6,7 +6,7 @@ module.exports = [
   `story-reaction s-fight: "C'est lui ou moi", pensa <@hero>, tout en dégainant <weapon@object>.`,
   `story-reaction s-fight: "Ca commence à suffire !", s'écria <@hero>, tout en ramassant <weapon@object>. "Viens là, je t'attend !"`,
   `story-reaction s-steal: Il entend <sound> <location near>, c'est <enemy@badguy> qui lui a dérobé <lostobject@object> !`,
-  `story-adventure !unhappyend: <enemy@badguy> bondit sur <@hero> en rugissant et l'attrapa par <member>.///Avant qu'il n'aie eu le temps de comprendre, <@hero> était par terre. Il essaya de se débattre avec <weapon@object> mais c'était déjà trop tard.`,
+  `story-adventure !unhappyend: <enemy@badguy> bondit sur <@hero> en rugissant et l'attrapa par <member>.///Avant qu'il n'aie eu le temps de comprendre, <@hero> était à terre. Il essaya de se débattre avec <weapon@object> mais c'était déjà trop tard.`,
   `story-adventure !happyend: <@hero> se lanca à sa poursuite <locomotion>.///<enemy@badguy> tenta de se sauver mais <ìllness> l'empêchait de courir trop vite. Epuisé, il <fall pp>.`,
   `story-adventure !unhappyend: <@hero> tenta de l'attirer en déposant <location ground> <food>.///Mais <enemy@badguy> n'est pas dupe, il comprend vite qu'il s'agit d'un piège et s'enfuit rapidement <locomotion>.`,
   `story-end happyend: <@hero> est <adj emotion good>, il va pouvoir <revenge>.`,

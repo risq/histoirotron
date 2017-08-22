@@ -36,10 +36,8 @@ function start() {
 
         server.listen(PORT, () => {
           debug(`App listening on port ${PORT}`);
-          printer.print(`- App listening on port ${PORT} -`, true)
-            .then(() => printer.feed(2))
-            .then(() => printer.print(storyGenerator.generateStory()))
-            .then(() => printer.feed(2))
+          printer.print(`- App listening on port ${PORT} -`, true, 3)
+            .then(() => printer.print(storyGenerator.generateStory(), false, 4))
         });
 
         arduino.events.on('scan-start', onScanStart);
