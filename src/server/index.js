@@ -37,7 +37,6 @@ function start() {
         server.listen(PORT, () => {
           debug(`App listening on port ${PORT}`);
           printer.print(`- App listening on port ${PORT} -`, true, 3)
-            .then(() => printer.print(storyGenerator.generateStory(), false, 4))
         });
 
         arduino.events.on('scan-start', onScanStart);
@@ -70,7 +69,8 @@ function onScanStop() {
   debug(`Scan ended, collected UIDs: ${uids.join(', ')}`);
   scanStarted = false;
 
-  setTimeout(() => io.sockets.emit('startEndAnimation'), 5000)
+  io.sockets.emit('startEndAnimation');
+  printer.print(storyGenerator.generateStory(), false, 4)
 }
 
 function onUid(uid) {

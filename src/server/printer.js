@@ -1,4 +1,5 @@
 const Promise = require('bluebird');
+const retry = require('bluebird-retry');
 const config = require('config');
 const debug = require('debug')('histoirotron:printer');
 const wrap = require('word-wrap');
@@ -7,7 +8,7 @@ const rp = require('request-promise');
 let ready;
 
 function print(text, center = false, feed = 0, size = 1) {
-  return rp({
+  return retry(() => rp({
       method: 'POST',
       uri: config.get('printer.printUrl'),
       body: {
@@ -17,6 +18,9 @@ function print(text, center = false, feed = 0, size = 1) {
           size,
       },
       json: true,
+  }), {
+    interval: 1000,
+    backoff: 2
   })
   .catch((err) => debug(err));
 }

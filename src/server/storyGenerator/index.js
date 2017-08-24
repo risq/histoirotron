@@ -8,7 +8,7 @@ const contextTags = {
 }
 
 function generateStory() {
-  const context = { contextTags, persistantValues : {} };
+  const context = { contextTags: {}, storyTags: {}, persistantValues : {} };
   const bucket = dictionary.map(parsePart);
 
   const story = fillPart('<story>', bucket, context)
@@ -18,9 +18,9 @@ function generateStory() {
       return line[0].toUpperCase() + line.slice(1);
     })
     .join('\n')
-    .replace(/de le/g, 'du')
-    .replace(/de les/g, 'des')
-    .replace(/de y/g, 'd\'y')
+    .replace(/ de le /g, ' du ')
+    .replace(/ de les /g, ' des ')
+    .replace(/ de ([aeiouy])/, " d'$1")
     .replace(/,\./g, '.');
   debug('---------- Story -----------');
   debug(story);
@@ -67,47 +67,76 @@ function findPart(bucket, context, partType, ...partTags) {
 
 // From all the parts in a bucket, returns the best result for a type with tags
 function requestMatchingPart(bucket, context, partType, partTags) {
+  //console.log("===================================")
+  //console.log('requestMatchingPart',  context, partType, partTags);
+
   // filter by partTags:
 	const matchingParts = bucket.filter(
   	availablePart =>
     	partType === availablePart.type &&
       partTags.every(tag => availablePart.tags.includes(tag))
-  ).map(filteredPart => {
-    // compûtes the score of each candidate
-    const score =  filteredPart.tags.reduce(
+  ).filter(
+  	availablePart => {
+        //console.log('part', availablePart.value);
+        if (availablePart.storyTags.length) {
+          //console.log('storyTags', availablePart.storyTags, 'need', context.storyTags);
+        }
+
+        return true
+    }).map(filteredPart => {
+    // computes the score of each candidate
+    const tagScore =  filteredPart.tags.reduce(
       (acc, tag) => (context.contextTags[tag] !== undefined ? acc + context.contextTags[tag] : acc), 0);
-    return {part: filteredPart, score };
+    const storyTagScore =  filteredPart.storyTags.reduce(
+      (acc, tag) => (context.storyTags[tag] !== undefined ? 1 : acc), 0);
+    return {part: filteredPart, tagScore, storyTagScore };
   });
+  //console.log('matchingParts: ');
+  //matchingParts.forEach(matchingPart => console.log(matchingPart))
 
   if (matchingParts.length) {
     // select random into the best scores
   	const choosenPart = getBestScorePart(matchingParts);
+
     choosenPart.contextTags.forEach(tag => {
       if(!context.contextTags[tag]) context.contextTags[tag] = 0;
       context.contextTags[tag]++;
     });
+
+    choosenPart.storyTags.forEach(tag => {
+      if(!context.storyTags[tag]) context.storyTags[tag] = 0;
+      context.storyTags[tag]++;
+    });
+
     bucket.splice(bucket.findIndex(part => part === choosenPart), 1);
+    //console.log('choosen: ', choosenPart.value);
     return choosenPart.value;
   }
 
-  console.log(`> Can not find part for ${partType} ${partTags.join(',')}`)
+  //console.log(`> Can not find part for ${partType} ${partTags.join(',')}`)
   return '[...]';
 }
 
 function parsePart(part) {
 	const reg = /(.*?)(\s.*?)?:(.*)/g
   const res = reg.exec(part);
+
   return {
   	type: res[1].trim(),
     tags: getAllMatches(/([a-zA-Z0-9\-]+)(\s|$)/g, res[2]).map(match => match[1]),
-    contextTags: getAllMatches(/\!(.*?)(\s|$)/g, res[2]).map(match => match[1]),
+    contextTags: getAllMatches(/\!([a-zA-Z0-9\-]+)(\s|$)/g, res[2]).map(match => match[1]),
+    storyTags: getAllMatches(/\&([a-zA-Z0-9\-]+)(\s|$)/g, res[2]).map(match => match[1]),
     value: res[3].trim(),
   };
 }
 
 function getBestScorePart(results) {
-  const bestParts = results.sort((a, b) => b.score - a.score)
-    .filter((result, index, array) => result.score === array[0].score);
+  const bestParts = results.sort((a, b) => (b.storyTagScore !== a.storyTagScore ?
+    b.storyTagScore - a.storyTagScore :
+    b.tagScore - a.tagScore))
+    .filter((result, index, array) =>
+      result.tagScore === array[0].tagScore &&
+      result.storyTagScore === array[0].storyTagScore);
 	return getRandomFromArray(bestParts).part;
 }
 
