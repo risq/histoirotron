@@ -20,7 +20,6 @@ function print(text, center = false, feed = 0, size = 1) {
       json: true,
   }), {
     interval: 1000,
-    backoff: 2
   })
   .catch((err) => debug(err));
 }

@@ -18,6 +18,7 @@ int dir = 1;
 int check = 0;
 int limitSwitchLeftState = 0;
 int startButtonState = 0;
+int lastStartButtonState = 0;
 int limitSwitchRightState = 0;
 bool moving = false;
 
@@ -34,11 +35,14 @@ void setup() {
   pinMode(LIMIT_SWITCH_LEFT_PIN, INPUT);
   pinMode(LIMIT_SWITCH_RIGHT_PIN, INPUT);
 
+  startButtonState = digitalRead(START_BUTTON_PIN);
+  lastStartButtonState = digitalRead(START_BUTTON_PIN);
+
   startMoving();
 }
 
 void loop() {
-  if ( check == 100 ) {
+  if (check == 75) {
     check = 0;
     
     if (rfid.PICC_IsNewCardPresent()) {
@@ -48,11 +52,6 @@ void loop() {
         Serial.print("[UID] "); 
         Serial.println(uid);
         Serial.println();
-
-        if (uid == 4294961722) {
-          Serial.println("Special card found: starting to move.");
-          startMoving();
-        }
       }
     }
   } else {
@@ -60,11 +59,6 @@ void loop() {
   }
 
   startButtonState = digitalRead(START_BUTTON_PIN);
-
-  if (startButtonState == HIGH) {
-    startMoving();
-  }
-  
   limitSwitchLeftState = digitalRead(LIMIT_SWITCH_LEFT_PIN);
   limitSwitchRightState = digitalRead(LIMIT_SWITCH_RIGHT_PIN);
   
@@ -78,6 +72,9 @@ void loop() {
     stopMoving();
   } else if (moving) {
     stepper.step(MOTOR_STEPS / 100 * dir);
+  } else if (startButtonState != lastStartButtonState) {
+    lastStartButtonState = startButtonState;
+    startMoving();
   }
 }
 

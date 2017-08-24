@@ -10,6 +10,7 @@ const appRoot = require('app-root-path');
 
 const arduino = require('./arduino');
 const printer = require('./printer');
+const wordsList = require('./words');
 const storyGenerator = require('./storyGenerator');
 
 const PORT = process.env.PORT || config.get('server.port');;
@@ -17,7 +18,7 @@ const PORT = process.env.PORT || config.get('server.port');;
 let app;
 let server;
 let io;
-let uids;
+let words;
 let scanStarted;
 
 function start() {
@@ -60,25 +61,27 @@ function onConnection(socket) {
 
 function onScanStart() {
   debug('Starting collecting UIDs...');
-  uids = [];
+  words = [];
   scanStarted = true;
   io.sockets.emit('startScanAnimation');
 }
 
 function onScanStop() {
-  debug(`Scan ended, collected UIDs: ${uids.join(', ')}`);
+  debug(`Scan ended, collected words: ${words.join(', ')}`);
   scanStarted = false;
 
   io.sockets.emit('startEndAnimation');
-  printer.print(storyGenerator.generateStory(), false, 4)
+  printer.print(words.join(', '), true, 2, 2)
+    .then(() => printer.print(storyGenerator.generateStory(), false, 4))
 }
 
 function onUid(uid) {
-  if (!scanStarted) {
+  debug('word:', wordsList[uid]);
+  if (!scanStarted || !wordsList[uid]) {
     return;
   }
 
-  uids.push(uid);
+  words.push(wordsList[uid]);
 }
 
 module.exports = {
