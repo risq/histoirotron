@@ -39,9 +39,10 @@ function onData(data) {
     return;
   }
 
-  if (string === '[START_SCAN]') {
-    debug('Starting to scan');
-    events.emit('scan-start');
+  if (string === 'Button') {
+    debug('button');
+    console.log("")
+    events.emit('button');
     return;
   }
 
@@ -51,11 +52,12 @@ function onData(data) {
     return;
   }
 
-  const uidMatch = /\[UID\]\s(.*)/.exec(string);
+  const uidMatch = /\[READER\](.*)\[UID\](.*)/.exec(string);
   if (uidMatch) {
-    const uid = uidMatch[1];
-    debug(`Found UID: ${uid}`);
-    events.emit('uid', uid);
+    const reader = uidMatch[1];
+    const uid = uidMatch[2];
+    debug(`Found UID: ${uid} READER: ${reader}`);
+    events.emit('uid', reader,  uid);
     return;
   }
 

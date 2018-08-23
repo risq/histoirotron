@@ -43,7 +43,7 @@
 #define SS_2_PIN        8          // Configurable, take a unused pin, only HIGH/LOW required, must be diffrent to SS 1
 #define SS_3_PIN        4          // Configurable, take a unused pin, only HIGH/LOW required, must be diffrent to SS 1
 
-#define BUTTON_PIN        4   
+#define BUTTON_PIN  3   
 //must have one SS_x_PIN for each reader connected
 #define NR_OF_READERS   3
 
@@ -71,6 +71,7 @@ void setup() {
     mfrc522[reader].PCD_DumpVersionToSerial();
       }
     pinMode(BUTTON_PIN, INPUT);
+    digitalWrite(BUTTON_PIN, LOW);
 }
 
 /**
@@ -86,12 +87,16 @@ void loop() {
     //   
     //Serial.println("Reading readers" + String(ValidCardOrder) + "-----" + String(Card_1_ok) + "--" + String(Card_2_ok) + "--" + String(Card_3_ok));   
 
-    if (mfrc522[reader].PICC_IsNewCardPresent() && mfrc522[reader].PICC_ReadCardSerial()) {
-      Serial.print(F("Reader "));
+    if (mfrc522[reader].PICC_IsNewCardPresent() && mfrc522[reader].PICC_ReadCardSerial()) { 
+
+      Serial.print("[READER]"); 
       Serial.print(reader);
-      // Show some details of the PICC (that is: the tag/card)
+      Serial.print("[UID]"); 
+        
       dump_byte_array(mfrc522[reader].uid.uidByte, mfrc522[reader].uid.size);
-      Serial.println(read_rfid);
+      Serial.print(read_rfid);
+
+      Serial.println();
             
       // Halt PICC
       mfrc522[reader].PICC_HaltA();
@@ -100,7 +105,8 @@ void loop() {
     }
     
      } 
-      Serial.print(F("Button "));
+     
+     Serial.print(F("Button"));
      Serial.println(digitalRead(BUTTON_PIN));
 }
 
