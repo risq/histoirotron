@@ -8,6 +8,7 @@ const rp = require('request-promise');
 let ready;
 
 function print(text, center = false, feed = 0, size = 1) {
+  return;
   return retry(() => rp({
       method: 'POST',
       uri: config.get('printer.printUrl'),

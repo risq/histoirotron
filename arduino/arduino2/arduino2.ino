@@ -36,16 +36,6 @@
 #include <SPI.h>
 #include <MFRC522.h>
 
-#define RST_PIN 9 
-#define SS_PIN 10
-#define START_BUTTON_PIN 8
-#define LIMIT_SWITCH_LEFT_PIN 2
-#define LIMIT_SWITCH_RIGHT_PIN 3
-
-#define MOTOR_STEPS 200
-#define STEPPER_SPEED 75
-
-
 #define RST_PIN         9          // Configurable, see typical pin layout above
 
 //each SS_x_PIN variable indicates the unique SS pin for another RFID reader
@@ -53,20 +43,21 @@
 #define SS_2_PIN        8          // Configurable, take a unused pin, only HIGH/LOW required, must be diffrent to SS 1
 #define SS_3_PIN        4          // Configurable, take a unused pin, only HIGH/LOW required, must be diffrent to SS 1
 
-
-
+#define BUTTON_PIN        4   
 //must have one SS_x_PIN for each reader connected
 #define NR_OF_READERS   3
 
 byte ssPins[] = {SS_1_PIN, SS_2_PIN,SS_3_PIN};
 
 MFRC522 mfrc522[NR_OF_READERS];   // Create MFRC522 instance.
+String read_rfid;
 
-int check = 0;
-int startButtonState = 0;
-int lastStartButtonState = 0;
 
+/**
+ * Initialize.
+ */
 void setup() {
+  
   Serial.begin(9600); // Initialize serial communications with the PC
   while (!Serial);    // Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4)
 
@@ -78,52 +69,46 @@ void setup() {
     Serial.print(reader);
     Serial.print(F(": "));
     mfrc522[reader].PCD_DumpVersionToSerial();
-  }
-    
-  pinMode(START_BUTTON_PIN, INPUT);
-
-  startButtonState = digitalRead(START_BUTTON_PIN);
-  lastStartButtonState = digitalRead(START_BUTTON_PIN);
-
-}
-
-void loop() {
-    /*startButtonState = digitalRead(START_BUTTON_PIN);
-    
-    if(startButtonState == lastStartButtonState) return;
-      lastStartButtonState = startButtonState;
-    if(startButtonState == LOW) return;
-*/
-    for (uint8_t reader = 0; reader < NR_OF_READERS; reader++) {
-      if (mfrc522[reader].PICC_IsNewCardPresent()) {
-        Serial.print(F("Reader "));
-        Serial.print(reader);
-
-        unsigned long uid = getID(mfrc522[reader]);
-      
-        if (uid != -1){
-          Serial.print("[UID] "); 
-          Serial.println(uid);
-          Serial.println();
-        }
-      } 
-   } 
-
+      }
+    pinMode(BUTTON_PIN, INPUT);
 }
 
 /**
- * rfid.PICC_IsNewCardPresent() should be checked before 
- * @return the card UID
+ * Main loop.
  */
-unsigned long getID(MFRC522 rfid){
-  if ( ! rfid.PICC_ReadCardSerial()) { //Since a PICC placed get Serial and continue
-    return -1;
+void loop() {
+  
+  
+  for (uint8_t reader = 0; reader < NR_OF_READERS; reader++) {
+    // Look for new cards  
+    
+          
+    //   
+    //Serial.println("Reading readers" + String(ValidCardOrder) + "-----" + String(Card_1_ok) + "--" + String(Card_2_ok) + "--" + String(Card_3_ok));   
+
+    if (mfrc522[reader].PICC_IsNewCardPresent() && mfrc522[reader].PICC_ReadCardSerial()) {
+      Serial.print(F("Reader "));
+      Serial.print(reader);
+      // Show some details of the PICC (that is: the tag/card)
+      dump_byte_array(mfrc522[reader].uid.uidByte, mfrc522[reader].uid.size);
+      Serial.println(read_rfid);
+            
+      // Halt PICC
+      mfrc522[reader].PICC_HaltA();
+      // Stop encryption on PCD
+      mfrc522[reader].PCD_StopCrypto1();
+    }
+    
+     } 
+      Serial.print(F("Button "));
+     Serial.println(digitalRead(BUTTON_PIN));
+}
+
+
+
+void dump_byte_array(byte *buffer, byte bufferSize) {
+  read_rfid = "";
+  for (byte i = 0; i < bufferSize; i++) {
+    read_rfid = read_rfid + String(buffer[i], HEX);
   }
-  unsigned long hex_num;
-  hex_num =  rfid.uid.uidByte[0] << 24;
-  hex_num += rfid.uid.uidByte[1] << 16;
-  hex_num += rfid.uid.uidByte[2] <<  8;
-  hex_num += rfid.uid.uidByte[3];
-  rfid.PICC_HaltA(); // Stop reading
-  return hex_num;
 }

@@ -14,6 +14,7 @@ const uids = {
 function start() {
   arduino.init()
     .then(() => {
+      console.log("arduino init");
         arduino.events.on('uid', onUid);
     })
     .catch(err => console.log(err))
